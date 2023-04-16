@@ -18,6 +18,7 @@ public class Piece : MonoBehaviour
     private PieceType piece = PieceType.None;
     private bool promoted;
     private bool enemy;
+    private bool player;
 
     void Awake()
     {
@@ -46,15 +47,21 @@ public class Piece : MonoBehaviour
         return enemy;
     }
 
+    public bool isPlayer()
+    {
+        return player;
+    }
+
     public bool isPromoted()
     {
         return promoted;
     }
 
-    public void setPiece(PieceType piece, bool enemy, bool promoted)
+    public void setPiece(PieceType piece, bool enemy, bool player, bool promoted)
     {
         this.piece = piece;
         this.enemy = enemy;
+        this.player = player;
         if (enemy)
             characterFace.transform.Rotate(0, 180, 0, Space.World);
         this.promoted = promoted;

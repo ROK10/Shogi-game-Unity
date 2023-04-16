@@ -67,6 +67,14 @@ public class Tile : MonoBehaviour
             false
         );
     }
+    public bool isPlayer ()
+    {
+        return (
+            this.piece != null ?
+            this.piece.isPlayer() :
+            false
+        );
+    }
 
     public PieceType getState()
     {
@@ -82,17 +90,17 @@ public class Tile : MonoBehaviour
         return piece.pieceMoves(this.row, this.col, board);
     }
 
-    public void setState(PieceType state, bool enemy, bool promoted)
+    public void setState(PieceType state, bool enemy, bool player, bool promoted)
     {
         if (state == PieceType.None) removePiece();
         else
         {
-            if (this.piece == null) addPiece(state, enemy, promoted);
+            if (this.piece == null) addPiece(state, enemy, player, promoted);
             else
             {
                 Logger.Log(this.piece.isEnemy(), state, this.piece.getPiece());
                 removePiece();
-                addPiece(state, enemy, promoted);
+                addPiece(state, enemy, player, promoted);
                 StartCoroutine(logWait());
             }
         }
@@ -102,17 +110,18 @@ public class Tile : MonoBehaviour
     {
         PieceType temp = this.piece.getPiece();
         bool tempSide = this.piece.isEnemy();
+        bool tempSide2 = this.piece.isPlayer();
         bool tempStance = this.piece.isPromoted();
         yield return
             this.piece.StartCoroutine(
                 this.piece.moveAnimation(targetTile.transform.position)
             );
-        setState(PieceType.None, false, false);
-        targetTile.setState(temp, tempSide, tempStance);
+        setState(PieceType.None, false, false, false);
+        targetTile.setState(temp, tempSide, tempSide2, tempStance);
         targetTile.checkPromotion();
     }
 
-    private void addPiece(PieceType state, bool enemy, bool promoted)
+    private void addPiece(PieceType state, bool enemy, bool player ,bool promoted)
     {
         this.piece = Instantiate(
             GameController.piecePrefab,
@@ -121,7 +130,7 @@ public class Tile : MonoBehaviour
         if (enemy)
             this.piece.gameObject.transform.GetChild(0)
             .Rotate(0, 180, 0, Space.World);
-        this.piece.setPiece(state, enemy, promoted);
+        this.piece.setPiece(state, enemy, player, promoted);
     }
 
     private void removePiece()
