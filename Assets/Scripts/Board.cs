@@ -64,42 +64,7 @@ public class Board : MonoBehaviour
         board[8, 3].setState(PieceType.Gold, true, false, false);
         board[8, 4].setState(PieceType.King, true, false, false);
     }
-    public int EvaluateBoard()
-    {
-        int score = 0;
-
-        foreach (Tile tile in board)
-        {
-            if (tile.getState() != PieceType.None)
-            {
-                int pieceValue = GetPieceValue(tile.getState());
-                score += tile.isEnemy() ? pieceValue : -pieceValue;
-            }
-        }
-
-        return score;
-    }
-
-    public int GetPieceValue(PieceType piece)
-    {
-        switch (piece)
-        {
-            case PieceType.Pawn:
-                return 1;
-            case PieceType.Rook:
-                return 5;
-            case PieceType.Knight:
-                return 3;
-            case PieceType.Bishop:
-                return 3;
-            case PieceType.Lance:
-                return 9;
-            case PieceType.King:
-                return 1000;
-            default:
-                return 0;
-        }
-    }
+    
     public List<Tile[]> GetAllPossibleMoves(bool isEnemy)
     {
         List<Tile[]> possibleMoves = new List<Tile[]>();
@@ -123,5 +88,41 @@ public class Board : MonoBehaviour
             }
         }
         return possibleMoves;
+    }
+
+    public Board CloneWithMove(Tile startTile, Tile endTile)
+    {
+        // Create a new GameObject and add the Board component
+        GameObject newBoardObject = new GameObject("ClonedBoard");
+        Board clonedBoard = newBoardObject.AddComponent<Board>();
+
+        // Initialize the cloned board
+        clonedBoard.board = new Tile[boardSize, boardSize];
+        for (int row = 0; row < boardSize; row++)
+        {
+            for (int col = 0; col < boardSize; col++)
+            {
+                clonedBoard.board[row, col] = Instantiate(board[row, col], newBoardObject.transform);
+                clonedBoard.board[row, col].setPosition(row, col);
+            }
+        }
+
+        // Get the start and end positions of the move
+        int startRow = startTile.getRow();
+        int startCol = startTile.getCol();
+        int endRow = endTile.getRow();
+        int endCol = endTile.getCol();
+
+        // Apply the move on the cloned board
+        PieceType movingPieceType = clonedBoard.board[startRow, startCol].getState();
+        bool movingPieceIsEnemy = clonedBoard.board[startRow, startCol].isEnemy();
+        bool movingPieceisPlayer = clonedBoard.board[startRow, startCol].isPlayer();
+        bool movingPieceisPromoted = clonedBoard.board[startRow, startCol].isPromoted();
+        clonedBoard.board[startRow, startCol].setState(PieceType.None, false, false, false);
+        clonedBoard.board[endRow, endCol].setState(movingPieceType, movingPieceIsEnemy, movingPieceisPlayer, movingPieceisPromoted);
+
+        clonedBoard.initializeBoard();
+
+        return clonedBoard;
     }
 }

@@ -266,16 +266,125 @@ public class GameController : MonoBehaviour
                 yield break;
             }
 
-            // TODO: Implement the Minimax algorithm to select the best move here.
+
+        //TODO: Implement the Minimax algorithm to select the best move here.
+            int bestValue = int.MinValue;
+            Tile[] bestMove = null;
+
+            foreach (Tile[] move in allPossibleEnemyMoves)
+            {
+                Board newBoard = board.CloneWithMove(move[0], move[1]);
+                int moveValue = Minimax(newBoard, 1, false);
+
+                if (moveValue > bestValue)
+                {
+                    bestValue = moveValue;
+                    bestMove = move;
+                }
+            }
+            //
+
+
+            Debug.Log("1111");
+
             // For now, we'll just choose a random move.
             Tile[] selectedMove = allPossibleEnemyMoves[Random.Range(0, allPossibleEnemyMoves.Count)];
 
-            Tile enemySelectedTile = selectedMove[0];
-            Tile enemyTargetedTile = selectedMove[1];
+            Tile enemySelectedTile = bestMove[0];
+            Tile enemyTargetedTile = bestMove[1];
+
+            //Tile enemySelectedTile = selectedMove[0];
+            //Tile enemyTargetedTile = selectedMove[1];
             yield return StartCoroutine(pieceMovement(enemySelectedTile, enemyTargetedTile));
         }
     }
 
+    private int Minimax(Board board, int depth, bool isMaximizingPlayer)
+    {
+        if (depth == 0)
+        {
+            Debug.Log("3333");
+            return EvaluateBoard(board, isMaximizingPlayer);
+        }
+
+        int bestValue = isMaximizingPlayer ? int.MinValue : int.MaxValue;
+
+        List<Tile[]> allPossibleMoves = board.GetAllPossibleMoves(isMaximizingPlayer);
+
+        foreach (Tile[] move in allPossibleMoves)
+        {
+            Board newBoard = board.CloneWithMove(move[0], move[1]);
+            int moveValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer);
+            Debug.Log("2222");
+            if (isMaximizingPlayer)
+            {
+                bestValue = Mathf.Max(bestValue, moveValue);
+            }
+            else
+            {
+                bestValue = Mathf.Min(bestValue, moveValue);
+            }
+        }
+
+        return bestValue;
+    }
+    public int EvaluateBoard(Board board, bool isMaximizingPlayer)
+    {
+        int score = 0;
+
+        // Iterate through all tiles on the board
+        for (int row = 0; row < 9; row++)
+        {
+            for (int col = 0; col < 9; col++)
+            {
+                Debug.Log("44444");
+                Tile tile = board.board[row, col];
+                PieceType pieceType = tile.getState();
+                int pieceValue = 0;
+
+                // Assign a value to each piece type
+                switch (pieceType)
+                {
+                    case PieceType.Pawn:
+                        pieceValue = 10;
+                        break;
+                    case PieceType.Knight:
+                        pieceValue = 30;
+                        break;
+                    case PieceType.Bishop:
+                        pieceValue = 30;
+                        break;
+                    case PieceType.Rook:
+                        pieceValue = 50;
+                        break;
+                    case PieceType.Lance:
+                        pieceValue = 20;
+                        break;
+                    case PieceType.Silver:
+                        pieceValue = 40;
+                        break;
+                    case PieceType.Gold:
+                        pieceValue = 50;
+                        break;
+                    case PieceType.King:
+                        pieceValue = 900;
+                        break;
+                    case PieceType.None:
+                    default:
+                        pieceValue = 0;
+                        break;
+                }
+
+                // Add or subtract the value from the total score depending on the piece's color
+                if (pieceType != PieceType.None)
+                {
+                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue : pieceValue;
+                }
+            }
+        }
+
+        return score;
+    }
 
     public void selectPiece()
     {
@@ -395,4 +504,30 @@ public class GameController : MonoBehaviour
     {
         Checkmate, KingKilled, NoMoves, NoPieces
     };
+    //public bool IsGameOver()
+    //{
+    //    bool isGameOver = false;
+
+    //    // Check if either king is in checkmate
+    //    bool isWhiteKingCheckmated = checkmateStatus(kingPiece, validWhiteKingMoves, validMoves, false);
+    //    bool isBlackKingCheckmated = checkmateStatus(blackKing, validBlackKingMoves, validMoves, true);
+
+    //    if (isWhiteKingCheckmated || isBlackKingCheckmated)
+    //    {
+    //        isGameOver = true;
+    //    }
+    //    else
+    //    {
+    //        // Check if either player has no legal moves (stalemate)
+    //        List<Tile[]> allPossibleWhiteMoves = board.GetAllPossibleMoves(false);
+    //        List<Tile[]> allPossibleBlackMoves = board.GetAllPossibleMoves(true);
+
+    //        if (allPossibleWhiteMoves.Count == 0 || allPossibleBlackMoves.Count == 0)
+    //        {
+    //            isGameOver = true;
+    //        }
+    //    }
+
+    //    return isGameOver;
+    //}
 }

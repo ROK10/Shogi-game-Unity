@@ -9,7 +9,11 @@ public class Tile : MonoBehaviour
     private Piece piece;
 
     private GameObject highlight;
-
+    public void Initialize(int row, int col)
+    {
+        this.row = row;
+        this.col = col;
+    }
     void Start()
     {
         highlight = transform.GetChild(1).gameObject;
