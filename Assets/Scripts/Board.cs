@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Board : MonoBehaviour
 {
@@ -62,5 +63,65 @@ public class Board : MonoBehaviour
         board[8, 5].setState(PieceType.Gold, true, false, false);
         board[8, 3].setState(PieceType.Gold, true, false, false);
         board[8, 4].setState(PieceType.King, true, false, false);
+    }
+    public int EvaluateBoard()
+    {
+        int score = 0;
+
+        foreach (Tile tile in board)
+        {
+            if (tile.getState() != PieceType.None)
+            {
+                int pieceValue = GetPieceValue(tile.getState());
+                score += tile.isEnemy() ? pieceValue : -pieceValue;
+            }
+        }
+
+        return score;
+    }
+
+    public int GetPieceValue(PieceType piece)
+    {
+        switch (piece)
+        {
+            case PieceType.Pawn:
+                return 1;
+            case PieceType.Rook:
+                return 5;
+            case PieceType.Knight:
+                return 3;
+            case PieceType.Bishop:
+                return 3;
+            case PieceType.Lance:
+                return 9;
+            case PieceType.King:
+                return 1000;
+            default:
+                return 0;
+        }
+    }
+    public List<Tile[]> GetAllPossibleMoves(bool isEnemy)
+    {
+        List<Tile[]> possibleMoves = new List<Tile[]>();
+
+        foreach (Tile tile in board)
+        {
+            if (tile.getState() != PieceType.None && tile.isEnemy() == isEnemy)
+            {
+                foreach (int[] move in tile.getMoves(board))
+                {
+                    int x = move[0], y = move[1];
+                    if (x >= 0 && x < Board.boardSize && y >= 0 && y < Board.boardSize)
+                    {
+                        Tile targetTile = board[x, y];
+                        if (targetTile.getState() == PieceType.None || targetTile.isEnemy() != isEnemy)
+                        {
+                            possibleMoves.Add(new Tile[] { tile, targetTile });
+                        }
+                    }
+                }
+            }
+        }
+        return possibleMoves;
     }
 }

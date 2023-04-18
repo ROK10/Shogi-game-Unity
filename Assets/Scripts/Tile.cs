@@ -75,6 +75,14 @@ public class Tile : MonoBehaviour
             false
         );
     }
+    public bool isPromoted()
+    {
+        return (
+            this.piece != null ?
+            this.piece.isPromoted() :
+            false
+        );
+    }
 
     public PieceType getState()
     {
