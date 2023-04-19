@@ -11,6 +11,11 @@ public class Board : MonoBehaviour
 
     void Awake()
     {
+        board = new Tile[9, 9];
+    }
+
+    void Start()
+    {
         initializeBoard();
         prepareBoard();
     }
