@@ -267,14 +267,15 @@ public class GameController : MonoBehaviour
                 yield break;
             }
 
+            int bestValue = int.MinValue;
             Tile[] bestMove = null;
 
-            int bestMoveValue = int.MinValue;
+            long bestMoveValue = long.MinValue;
             foreach (Tile[] move in allPossibleEnemyMoves)
             {
                 Board newBoard = board.CloneWithMove(move[0], move[1]);
-                int boardValue = Minimax(newBoard, 1, false, int.MinValue, int.MaxValue);
-                //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
+                long boardValue = Minimax(newBoard, 1, false, int.MinValue, int.MaxValue);
+                Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 if (boardValue > bestMoveValue)
                 {
                     bestMoveValue = boardValue;
@@ -291,30 +292,30 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public int Minimax(Board board, int depth, bool isMaximizingPlayer, int alpha, int beta)
+    public long Minimax(Board board, int depth, bool isMaximizingPlayer, long alpha, long beta)
     {
-        //Debug.Log($"Minimax called with depth: {depth}, isMaximizingPlayer: {isMaximizingPlayer}");
+        Debug.Log($"Minimax called with depth: {depth}, isMaximizingPlayer: {isMaximizingPlayer}");
 
         if (depth == 0)
         {
-            Debug.Log("645645");
-            return EvaluateBoard(board, isMaximizingPlayer);
+            return EvaluateBoard(this.board, isMaximizingPlayer);
         }
 
-        int bestValue;
+        long bestValue;
 
         if (isMaximizingPlayer)
         {
             bestValue = int.MinValue;
-            List<Tile[]> possibleMoves = isMaximizingPlayer ? board.GetAllPossibleMoves(true) : board.GetAllPossibleMoves(false);
+            List<Tile[]> possibleMoves = this.board.GetAllPossibleMoves(true);
             foreach (Tile[] move in possibleMoves)
             {
 
-                Board newBoard = board.CloneWithMove(move[0], move[1]);
-                int boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Board newBoard = this.board.CloneWithMove(move[0], move[1]);
+                long boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
                 bestValue = Math.Max(bestValue, boardValue);
                 Destroy(newBoard.gameObject);
-                //Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
                 alpha = Math.Max(alpha, bestValue);
 
@@ -328,17 +329,16 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            Debug.Log("645645");
             bestValue = int.MaxValue;
-            List<Tile[]> possibleMoves = isMaximizingPlayer ? board.GetAllPossibleMoves(true) : board.GetAllPossibleMoves(false);
-            //Debug.Log(possibleMoves);
+            List<Tile[]> possibleMoves = this.board.GetAllPossibleMoves(false);
             foreach (Tile[] move in possibleMoves)
             {
-                Board newBoard = board.CloneWithMove(move[0], move[1]);
-                int boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Board newBoard = this.board.CloneWithMove(move[0], move[1]);
+                long boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
                 bestValue = Math.Min(bestValue, boardValue);
                 Destroy(newBoard.gameObject);
-                //Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
                 beta = Math.Min(beta, bestValue);
 
                 // Prune the remaining branches if possible
@@ -348,90 +348,8 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        Debug.Log(bestValue);
+
         return bestValue;
-    }
-
-    public int EvaluateBoard(Board board, bool isMaximizingPlayer)
-    {
-        int score = 0;
-        int captureBonus = 50;
-        // Iterate through all tiles on the board
-        for (int row = 0; row < 9; row++)
-        {
-            for (int col = 0; col < 9; col++)
-            {
-                Tile tile = board.board[row, col];
-                PieceType pieceType = tile.getState();
-                //Debug.Log("row " + row + ", col " + col + ", type " + pieceType);
-                // PieceType pieceType = PieceType.Knight;
-                int pieceValue;
-
-                // Assign a value to each piece type
-                switch (pieceType)
-                {
-                    case PieceType.Pawn:
-                        pieceValue = 10;
-                        break;
-                    case PieceType.Knight:
-                        pieceValue = 30;
-                        break;
-                    case PieceType.Bishop:
-                        pieceValue = 30;
-                        break;
-                    case PieceType.Rook:
-                        pieceValue = 50;
-                        break;
-                    case PieceType.Lance:
-                        pieceValue = 20;
-                        break;
-                    case PieceType.Silver:
-                        pieceValue = 40;
-                        break;
-                    case PieceType.Gold:
-                        pieceValue = 50;
-                        break;
-                    case PieceType.King:
-                        pieceValue = 900;
-                        break;
-                    case PieceType.None:
-                        pieceValue = 0;
-                        break;
-                    default:
-                        pieceValue = 0;
-                        break;
-                }
-
-                //pieceValue += Random.Range(-10, 10);
-                // Add or subtract the value from the total score depending on the piece's color
-                if (pieceType != PieceType.None)
-                {
-                    int positionalScore = positionalScores[pieceType][row, col];
-                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
-
-                    // Add a capture bonus if the enemy piece can be captured
-                    if (tile.isEnemy() != isMaximizingPlayer)
-                    {
-                        List<Tile> attackingTiles = board.getAttackingTiles(tile, isMaximizingPlayer);
-                        if (attackingTiles.Count > 0)
-                        {
-                            score += (isMaximizingPlayer) ? captureBonus : -captureBonus;
-                        }
-                    }
-                }
-                //if (pieceType != PieceType.None)
-                //{
-                //    Debug.Log($"Piece type: {pieceType}, Piece value: {pieceValue}, Positional score: {positionalScores[pieceType][row, col]}");
-                //    int positionalScore = positionalScores[pieceType][row, col];
-                //    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
-                //}
-                //Debug.Log("score " + score);
-
-            }
-        }
-        //score += Random.Range(-10, 10);
-        Debug.Log($"Returning board score: {score} (isMaximizingPlayer: {isMaximizingPlayer})");
-        return score;
     }
 
     private static readonly Dictionary<PieceType, int[,]> positionalScores = new Dictionary<PieceType, int[,]>
@@ -440,11 +358,11 @@ public class GameController : MonoBehaviour
             { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
             { 5,  5,  5,  5,  5,  5,  5,  5,  5 },
             { 1,  1,  2,  3,  3,  2,  1,  1,  1 },
-            { 1,  1,  2,  3,  3,  2,  1,  1,  1 },
             { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
-            { 1,  1,  2,  3,  3,  2,  1,  1,  1 },
-            { 1,  1,  2,  3,  3,  2,  1,  1,  1 },
-            { 5,  5,  5,  5,  5,  5,  5,  5,  5 },
+            { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
+            { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
+            { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
+            { 0,  0,  0,  0,  0,  0,  0,  0,  0 },
             { 0,  0,  0,  0,  0,  0,  0,  0,  0 }
         } },
         {
@@ -547,7 +465,68 @@ public class GameController : MonoBehaviour
         }
     },
     };
-   
+    public int EvaluateBoard(Board board, bool isMaximizingPlayer)
+    {
+        int score = 0;
+
+        // Iterate through all tiles on the board
+        for (int row = 0; row < 9; row++)
+        {
+            for (int col = 0; col < 9; col++)
+            {
+                Debug.Log("44444");
+                Tile tile = board.board[row, col];
+                //PieceType pieceType = tile.getState();
+                PieceType pieceType = PieceType.Knight;
+                int pieceValue = 0;
+
+                // Assign a value to each piece type
+                switch (pieceType)
+                {
+                    case PieceType.Pawn:
+                        pieceValue = 1;
+                        break;
+                    case PieceType.Knight:
+                        pieceValue = 3;
+                        break;
+                    case PieceType.Bishop:
+                        pieceValue = 3;
+                        break;
+                    case PieceType.Rook:
+                        pieceValue = 5;
+                        break;
+                    case PieceType.Lance:
+                        pieceValue = 2;
+                        break;
+                    case PieceType.Silver:
+                        pieceValue = 4;
+                        break;
+                    case PieceType.Gold:
+                        pieceValue = 5;
+                        break;
+                    case PieceType.King:
+                        pieceValue = 90;
+                        break;
+                    case PieceType.None:
+                    default:
+                        pieceValue = 0;
+                        break;
+                }
+
+                pieceValue = Random.Range(0, 10);
+                // Add or subtract the value from the total score depending on the piece's color
+                if (pieceType != PieceType.None)
+                {
+                    Debug.Log($"Piece type: {pieceType}, Piece value: {pieceValue}, Positional score: {positionalScores[pieceType][row, col]}");
+                    int positionalScore = positionalScores[pieceType][row, col];
+                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
+                }
+            }
+        }
+
+        Debug.Log($"Returning board score: {score} (isMaximizingPlayer: {isMaximizingPlayer})");
+        return score;
+    }
 
     public void selectPiece()
     {

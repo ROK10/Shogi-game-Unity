@@ -9,6 +9,11 @@ public class Board : MonoBehaviour
 
     public AudioSource boardSound;
 
+    void Awake()
+    {
+        board = new Tile[9, 9];
+    }
+
     void Start()
     {
         initializeBoard();
@@ -90,32 +95,6 @@ public class Board : MonoBehaviour
         return possibleMoves;
     }
 
-    public List<Tile> getAttackingTiles(Tile targetTile, bool isMaximizingPlayer)
-    {
-        List<Tile> attackingTiles = new List<Tile>();
-
-        foreach (Tile tile in board)
-        {
-            if (tile.getState() != PieceType.None && tile.isEnemy() == isMaximizingPlayer)
-            {
-                foreach (int[] move in tile.getMoves(board))
-                {
-                    int x = move[0], y = move[1];
-                    if (x >= 0 && x < Board.boardSize && y >= 0 && y < Board.boardSize)
-                    {
-                        Tile possibleTargetTile = board[x, y];
-                        if (possibleTargetTile == targetTile && targetTile.isEnemy() != isMaximizingPlayer)
-                        {
-                            attackingTiles.Add(tile);
-                        }
-                    }
-                }
-            }
-        }
-
-        return attackingTiles;
-    }
-
     public Board CloneWithMove(Tile startTile, Tile endTile)
     {
         // Create a new GameObject and add the Board component
@@ -128,7 +107,7 @@ public class Board : MonoBehaviour
         {
             for (int col = 0; col < boardSize; col++)
             {
-                clonedBoard.board[row, col] = board[row, col].Clone(newBoardObject.transform);
+                clonedBoard.board[row, col] = Instantiate(board[row, col], newBoardObject.transform);
                 clonedBoard.board[row, col].setPosition(row, col);
             }
         }
@@ -146,6 +125,8 @@ public class Board : MonoBehaviour
         bool movingPieceisPromoted = clonedBoard.board[startRow, startCol].isPromoted();
         clonedBoard.board[startRow, startCol].setState(PieceType.None, false, false, false);
         clonedBoard.board[endRow, endCol].setState(movingPieceType, movingPieceIsEnemy, movingPieceisPlayer, movingPieceisPromoted);
+
+        clonedBoard.initializeBoard();
 
         return clonedBoard;
     }
