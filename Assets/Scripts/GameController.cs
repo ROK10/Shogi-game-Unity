@@ -273,7 +273,8 @@ public class GameController : MonoBehaviour
             foreach (Tile[] move in allPossibleEnemyMoves)
             {
                 Board newBoard = board.CloneWithMove(move[0], move[1]);
-                int boardValue = Minimax(newBoard, 1, false, int.MinValue, int.MaxValue);
+                //int boardValue = Minimax(newBoard, 1, false, int.MinValue, int.MaxValue);
+                int boardValue = EvaluateBoard(newBoard, false);
                 //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 if (boardValue > bestMoveValue)
                 {

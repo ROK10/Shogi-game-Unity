@@ -90,7 +90,10 @@ public class Tile : MonoBehaviour
             false
         );
     }
-
+    public Piece GetPiece()
+    {
+        return piece;
+    }
     public PieceType getState()
     {
         return (
@@ -182,7 +185,29 @@ public class Tile : MonoBehaviour
         yield return new WaitForSeconds(2.0f);
         Logger.Clear();
     }
+    public void SetPieceDirectly(Piece newPiece)
+    {
+        if (this.piece)
+        {
+            Destroy(this.piece.gameObject);
+        }
 
+        if (newPiece)
+        {
+            this.piece = Instantiate(newPiece, transform.position, Quaternion.identity);
+        }
+        else
+        {
+            this.piece = null;
+        }
+    }
+    public Tile Clone()
+    {
+        Tile clonedTile = new Tile();
+        clonedTile.Initialize(row, col);
+        clonedTile.SetPieceDirectly(piece);
+        return clonedTile;
+    }
     public Tile Clone(Transform parent)
     {
         // Create a new Tile object and set its parent
@@ -203,4 +228,5 @@ public class Tile : MonoBehaviour
 
         return clonedTile;
     }
+
 }

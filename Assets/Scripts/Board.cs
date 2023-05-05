@@ -115,7 +115,38 @@ public class Board : MonoBehaviour
 
         return attackingTiles;
     }
+    public BoardState GetBoardState()
+    {
+        BoardState boardState = new BoardState(boardSize);
 
+        for (int row = 0; row < boardSize; row++)
+        {
+            for (int col = 0; col < boardSize; col++)
+            {
+                boardState.pieceTypes[row, col] = board[row, col].getState();
+                boardState.isEnemy[row, col] = board[row, col].isEnemy();
+                boardState.isPlayer[row, col] = board[row, col].isPlayer();
+                boardState.isPromoted[row, col] = board[row, col].isPromoted();
+            }
+        }
+
+        return boardState;
+    }
+    public void ApplyBoardState(BoardState boardState)
+    {
+        for (int row = 0; row < boardSize; row++)
+        {
+            for (int col = 0; col < boardSize; col++)
+            {
+                board[row, col].setState(
+                    boardState.pieceTypes[row, col],
+                    boardState.isEnemy[row, col],
+                    boardState.isPlayer[row, col],
+                    boardState.isPromoted[row, col]
+                );
+            }
+        }
+    }
     public Board CloneWithMove(Tile startTile, Tile endTile)
     {
         // Create a new GameObject and add the Board component
@@ -128,8 +159,9 @@ public class Board : MonoBehaviour
         {
             for (int col = 0; col < boardSize; col++)
             {
-                clonedBoard.board[row, col] = board[row, col].Clone(newBoardObject.transform);
+                clonedBoard.board[row, col] = Instantiate(board[row, col], newBoardObject.transform);
                 clonedBoard.board[row, col].setPosition(row, col);
+                clonedBoard.board[row, col].SetPieceDirectly(board[row, col].GetPiece());
             }
         }
 
@@ -140,13 +172,24 @@ public class Board : MonoBehaviour
         int endCol = endTile.getCol();
 
         // Apply the move on the cloned board
-        PieceType movingPieceType = clonedBoard.board[startRow, startCol].getState();
-        bool movingPieceIsEnemy = clonedBoard.board[startRow, startCol].isEnemy();
-        bool movingPieceisPlayer = clonedBoard.board[startRow, startCol].isPlayer();
-        bool movingPieceisPromoted = clonedBoard.board[startRow, startCol].isPromoted();
-        clonedBoard.board[startRow, startCol].setState(PieceType.None, false, false, false);
-        clonedBoard.board[endRow, endCol].setState(movingPieceType, movingPieceIsEnemy, movingPieceisPlayer, movingPieceisPromoted);
+        clonedBoard.board[startRow, startCol].SetPieceDirectly(null);
+        clonedBoard.board[endRow, endCol].SetPieceDirectly(board[startRow, startCol].GetPiece());
 
         return clonedBoard;
+    }
+}
+public class BoardState
+{
+    public PieceType[,] pieceTypes;
+    public bool[,] isEnemy;
+    public bool[,] isPlayer;
+    public bool[,] isPromoted;
+
+    public BoardState(int size)
+    {
+        pieceTypes = new PieceType[size, size];
+        isEnemy = new bool[size, size];
+        isPlayer = new bool[size, size];
+        isPromoted = new bool[size, size];
     }
 }
