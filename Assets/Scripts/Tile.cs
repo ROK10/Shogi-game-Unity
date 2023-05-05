@@ -16,8 +16,11 @@ public class Tile : MonoBehaviour
     }
     void Start()
     {
-        highlight = transform.GetChild(1).gameObject;
-        highlight.SetActive(false);
+        if (transform.childCount > 1)
+        {
+            highlight = transform.GetChild(1).gameObject;
+            highlight.SetActive(false);
+        }
     }
 
     public int getRow()
@@ -104,16 +107,20 @@ public class Tile : MonoBehaviour
 
     public void setState(PieceType state, bool enemy, bool player, bool promoted)
     {
-        if (state == PieceType.None) removePiece();
+        if (state == PieceType.None)
+        {
+            removePiece();
+        }
         else
         {
-            if (this.piece == null) addPiece(state, enemy, player, promoted);
-            else
+            if (this.piece != null && (this.piece.getPiece() != state || this.piece.isEnemy() != enemy || this.piece.isPlayer() != player || this.piece.isPromoted() != promoted))
             {
-                Logger.Log(this.piece.isEnemy(), state, this.piece.getPiece());
                 removePiece();
+            }
+
+            if (this.piece == null)
+            {
                 addPiece(state, enemy, player, promoted);
-                StartCoroutine(logWait());
             }
         }
     }
@@ -174,5 +181,26 @@ public class Tile : MonoBehaviour
     {
         yield return new WaitForSeconds(2.0f);
         Logger.Clear();
+    }
+
+    public Tile Clone(Transform parent)
+    {
+        // Create a new Tile object and set its parent
+        GameObject newTileObject = new GameObject("ClonedTile");
+        newTileObject.transform.SetParent(parent);
+        Tile clonedTile = newTileObject.AddComponent<Tile>();
+
+        // Copy the relevant properties
+        clonedTile.setState(getState(), isEnemy(), isPlayer(), isPromoted());
+        clonedTile.setPosition(getRow(), getCol());
+
+        // Clone the highlight GameObject
+        if (highlight != null)
+        {
+            GameObject clonedHighlight = Instantiate(highlight, clonedTile.transform);
+            clonedTile.highlight = clonedHighlight;
+        }
+
+        return clonedTile;
     }
 }
