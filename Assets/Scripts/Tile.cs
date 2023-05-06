@@ -255,20 +255,4 @@ public class TestTile
         }
         this.piece.setPiece(state, enemy, player, promoted);
     }
-
-    private void checkPromotion()
-    {
-        if (this.piece.getPiece() == PieceType.King ||
-            this.piece.getPiece() == PieceType.Gold ||
-            this.piece.isPromoted())
-            return;
-
-        if (this.piece.isEnemy() == false &&
-            this.row >= Board.boardSize - 3)
-            this.piece.promotion();
-
-        else if (this.piece.isEnemy() == true &&
-            this.row < 3)
-            this.piece.promotion();
-    }
 }

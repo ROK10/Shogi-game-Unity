@@ -176,7 +176,24 @@ public class TestBoard
         }
         return newTestBoard;
     }
-
+    public TestBoard createNewBoard(TestBoard existingBoard)
+    {
+        TestBoard newTestBoard = new();
+        int boardSize = 9;
+        newTestBoard.testBoard = new TestTile[boardSize, boardSize];
+        for (int row = 0; row < boardSize; row++)
+        {
+            for (int col = 0; col < boardSize; col++)
+            {
+                //prepareBoard();
+                TestTile existingTile = new();
+                existingTile.setState(existingBoard.testBoard[row, col].getState(), existingBoard.testBoard[row, col].isEnemy(), existingBoard.testBoard[row, col].isPlayer(), existingBoard.testBoard[row, col].isPromoted());
+                newTestBoard.testBoard[row, col] = new TestTile();
+                newTestBoard.testBoard[row, col].setState(existingTile.getState(), existingTile.isEnemy(), existingTile.isPlayer(), existingTile.isPromoted());
+            }
+        }
+        return newTestBoard;
+    }
     private void prepareBoard()
     {
         // Prepare the player's side.
@@ -240,6 +257,12 @@ public class TestBoard
     }
 
     public void CloneMove(Tile startTile, Tile endTile)
+    {
+        testBoard[endTile.getRow(), endTile.getCol()].setState(startTile.getState(), startTile.isEnemy(), startTile.isPlayer(), startTile.isPromoted());
+        testBoard[startTile.getRow(), startTile.getCol()].setState(PieceType.None, false, false, false);
+
+    }
+    public void CloneMove(TestTile startTile, TestTile endTile)
     {
         testBoard[endTile.getRow(), endTile.getCol()].setState(startTile.getState(), startTile.isEnemy(), startTile.isPlayer(), startTile.isPromoted());
         testBoard[startTile.getRow(), startTile.getCol()].setState(PieceType.None, false, false, false);

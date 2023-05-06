@@ -269,17 +269,18 @@ public class GameController : MonoBehaviour
 
             Tile[] bestMove = null;
 
-            long bestMoveValue = -10000;
+            int bestMoveValue = -10000;
             foreach (Tile[] move in allPossibleEnemyMoves)
             {
                 //board.board[move[1].getRow(), move[1].getCol()].setState(move[0].getState(), move[0].isEnemy(), move[0].isPlayer(), move[0].isPromoted());
                 //board.board[move[0].getRow(), move[0].getCol()].setState(PieceType.None, false, false, false);
                 TestBoard newBoard = new();
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
+                //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
                 clonedBoard.CloneMove(move[0],move[1]);
-                //int boardValue = Minimax(newBoard, 1, false, int.MinValue, int.MaxValue);
-                int boardValue = EvaluateBoard(clonedBoard, false);
-
+                int boardValue = Minimax(clonedBoard, 2, false);
+                //int boardValue = EvaluateBoard(clonedBoard, false);
+                //Debug.Log($"Lance ?: + " + clonedBoard.testBoard[0,0].getState());
                 //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 //board.board[move[0].getRow(), move[0].getCol()].setState(move[1].getState(), move[1].isEnemy(), move[1].isPlayer(), move[1].isPromoted());
                 //board.board[move[1].getRow(), move[1].getCol()].setState(PieceType.None, false, false, false);
@@ -299,65 +300,50 @@ public class GameController : MonoBehaviour
         }
     }
 
-    //public long Minimax(TestBoard board, int depth, bool isMaximizingPlayer, long alpha, long beta)
-    //{
-    //    Debug.Log($"Minimax called with depth: {depth}, isMaximizingPlayer: {isMaximizingPlayer}");
+    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer)
+    {
 
-    //    if (depth == 0)
-    //    {
-    //        return EvaluateBoard(board, isMaximizingPlayer);
-    //    }
+        if (depth == 0)
+        {
+            return EvaluateBoard(board, isMaximizingPlayer);
+        }
 
-    //    long bestValue;
+        int bestValue;
 
-    //    if (isMaximizingPlayer)
-    //    {
-    //        bestValue = int.MinValue;
-    //        List<Tile[]> possibleMoves = this.board.GetAllPossibleMoves(true);
-    //        foreach (Tile[] move in possibleMoves)
-    //        {
+        if (isMaximizingPlayer)
+        {
+            bestValue = -10000;
+            List<TestTile[]> possibleMoves = board.GetAllPossibleMoves(true);
+            foreach (TestTile[] move in possibleMoves)
+            {
+                TestBoard newBoard = new();
+                TestBoard clonedBoard = newBoard.createNewBoard(board);
+                clonedBoard.CloneMove(move[0], move[1]);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                bestValue = Math.Max(bestValue, boardValue);
+                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
-    //            TestBoard newBoard = this.board.CloneWithMove(move[0], move[1]);
-    //            long boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
-    //            Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
-    //            bestValue = Math.Max(bestValue, boardValue);
-    //            Destroy(newBoard.gameObject);
-    //            Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
-    //            alpha = Math.Max(alpha, bestValue);
+            }
+        }
+        else
+        {
+            bestValue = 10000;
+            List<TestTile[]> possibleMoves = board.GetAllPossibleMoves(false);
+            foreach (TestTile[] move in possibleMoves)
+            {
 
-    //            // Prune the remaining branches if possible
-    //            if (beta <= alpha)
-    //            {
-    //                break;
-    //            }
+                TestBoard newBoard = new();
+                TestBoard clonedBoard = newBoard.createNewBoard(board);
+                clonedBoard.CloneMove(move[0], move[1]);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                bestValue = Math.Min(bestValue, boardValue);
+                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+            }
+        }
 
-    //        }
-    //    }
-    //    else
-    //    {
-    //        bestValue = int.MaxValue;
-    //        List<Tile[]> possibleMoves = this.board.GetAllPossibleMoves(false);
-    //        foreach (Tile[] move in possibleMoves)
-    //        {
-    //            TestBoard newBoard = this.board.CloneWithMove(move[0], move[1]);
-    //            long boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
-    //            Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
-    //            bestValue = Math.Min(bestValue, boardValue);
-    //            Destroy(newBoard.gameObject);
-    //            Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
-    //            beta = Math.Min(beta, bestValue);
-
-    //            // Prune the remaining branches if possible
-    //            if (beta <= alpha)
-    //            {
-    //                break;
-    //            }
-    //        }
-    //    }
-
-    //    return bestValue;
-    //}
+        return bestValue;
+    }
     public int EvaluateBoard(TestBoard board, bool isMaximizingPlayer)
     {
         int score = 0;
@@ -369,6 +355,7 @@ public class GameController : MonoBehaviour
             {
                 TestTile tile = board.testBoard[row, col];
                 PieceType pieceType = tile.getState();
+                //Debug.Log(tile.getState());
                 //PieceType pieceType = PieceType.Knight;
                 int pieceValue = 0;
 
@@ -413,13 +400,13 @@ public class GameController : MonoBehaviour
                 {
                     int positionalScore = positionalScores[pieceType][row, col];
                     //Debug.Log((tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore);
-                    //score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
-                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue  : pieceValue;
+                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
+                    //score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue  : pieceValue;
                 }
             }
         }
 
-        Debug.Log($"Returning board score: {score} (isMaximizingPlayer: {isMaximizingPlayer})");
+        //Debug.Log($"Returning board score: {score} (isMaximizingPlayer: {isMaximizingPlayer})");
         return score;
     }
 

@@ -108,35 +108,43 @@ public class Piece : MonoBehaviour
             switch (piece)
             {
                 case PieceType.Pawn:
-                    characterFace.text = "歩";
+                    characterFace.text = "P";
+                    //characterFace.text = "歩";
                     break;
 
                 case PieceType.Lance:
-                    characterFace.text = "香";
+                    characterFace.text = "L";
+                    //characterFace.text = "香";
                     break;
 
                 case PieceType.Knight:
-                    characterFace.text = "桂";
+                    characterFace.text = "Kn";
+                    //characterFace.text = "桂";
                     break;
 
                 case PieceType.Bishop:
-                    characterFace.text = "角";
+                    characterFace.text = "B";
+                    //characterFace.text = "角";
                     break;
 
                 case PieceType.Rook:
-                    characterFace.text = "飛";
+                    characterFace.text = "R";
+                    //characterFace.text = "飛";
                     break;
 
                 case PieceType.Silver:
-                    characterFace.text = "銀";
+                    characterFace.text = "S";
+                    //characterFace.text = "銀";
                     break;
 
                 case PieceType.Gold:
-                    characterFace.text = "金";
+                    characterFace.text = "G";
+                    //characterFace.text = "金";
                     break;
 
                 case PieceType.King:
-                    characterFace.text = (enemy ? "王" : "玉");
+                    characterFace.text = "Ki";
+                    //characterFace.text = (enemy ? "王" : "玉");
                     break;
 
                 default:
@@ -577,11 +585,10 @@ public class TestPiece
     {
         for (int i = row + 1; i < TestBoard.boardSize; i++)
         {
-            if (board[i, col].getState() == PieceType.None ||
-                board[i, col].isEnemy())
+            if (board[i, col].getState() == PieceType.None)
             {
                 possibleMoves.Add(new int[2] { i, col });
-                if (board[i, col].isEnemy()) break;
+                if (board[i, col].isPlayer()) break;
             }
             else break;
         }
