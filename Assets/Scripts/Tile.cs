@@ -175,4 +175,100 @@ public class Tile : MonoBehaviour
         yield return new WaitForSeconds(2.0f);
         Logger.Clear();
     }
+    public Tile CreateTileFromExisting(Tile existingTile)
+    {
+        Tile newTile = Instantiate(existingTile);
+        newTile.Initialize(existingTile.getRow(), existingTile.getCol());
+        return newTile;
+    }
+}
+public class TestTile
+{
+    private int row;
+    private int col;
+    public TestPiece piece;
+    public TestTile(int row = 0, int col = 0)
+    {
+        this.row = row;
+        this.col = col;
+    }
+    public int getRow()
+    {
+        return row;
+    }
+
+    public int getCol()
+    {
+        return col;
+    }
+
+    public void setPosition(int row, int col)
+    {
+        this.row = row;
+        this.col = col;
+    }
+
+    public bool isEnemy()
+    {
+        return (
+            this.piece != null ?
+            this.piece.isEnemy() :
+            false
+        );
+    }
+    public bool isPlayer()
+    {
+        return (
+            this.piece != null ?
+            this.piece.isPlayer() :
+            false
+        );
+    }
+    public bool isPromoted()
+    {
+        return (
+            this.piece != null ?
+            this.piece.isPromoted() :
+            false
+        );
+    }
+
+    public PieceType getState()
+    {
+        return (
+            this.piece != null ?
+            this.piece.getPiece() :
+            PieceType.None
+        );
+    }
+
+    public List<int[]> getMoves(TestTile[,] board)
+    {
+        return piece.pieceMoves(this.row, this.col, board);
+    }
+
+    public void setState(PieceType state, bool enemy, bool player, bool promoted)
+    {
+        if (this.piece == null)
+        {
+            this.piece = new TestPiece();
+        }
+        this.piece.setPiece(state, enemy, player, promoted);
+    }
+
+    private void checkPromotion()
+    {
+        if (this.piece.getPiece() == PieceType.King ||
+            this.piece.getPiece() == PieceType.Gold ||
+            this.piece.isPromoted())
+            return;
+
+        if (this.piece.isEnemy() == false &&
+            this.row >= Board.boardSize - 3)
+            this.piece.promotion();
+
+        else if (this.piece.isEnemy() == true &&
+            this.row < 3)
+            this.piece.promotion();
+    }
 }
