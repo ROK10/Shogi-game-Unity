@@ -129,6 +129,11 @@ public class Board : MonoBehaviour
             {
                 clonedBoard.board[row, col] = Instantiate(board[row, col], newBoardObject.transform);
                 clonedBoard.board[row, col].setPosition(row, col);
+                MeshRenderer meshRenderer = clonedBoard.board[row, col].GetComponentInChildren<MeshRenderer>();
+                if (meshRenderer != null)
+                {
+                    meshRenderer.enabled = false;
+                }
             }
         }
 

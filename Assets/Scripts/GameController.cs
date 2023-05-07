@@ -274,12 +274,16 @@ public class GameController : MonoBehaviour
             {
                 //board.board[move[1].getRow(), move[1].getCol()].setState(move[0].getState(), move[0].isEnemy(), move[0].isPlayer(), move[0].isPromoted());
                 //board.board[move[0].getRow(), move[0].getCol()].setState(PieceType.None, false, false, false);
-                TestBoard newBoard = new();
-                TestBoard clonedBoard = newBoard.createNewBoard(board);
-                //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
-                clonedBoard.CloneMove(move[0],move[1]);
-                int boardValue = Minimax(clonedBoard, 2, false);
-                //int boardValue = EvaluateBoard(clonedBoard, false);
+                //TestBoard newBoard = new();
+                //TestBoard clonedBoard = newBoard.createNewBoard(board);
+                ////Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
+                //clonedBoard.CloneMove(move[0],move[1]);
+                //int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
+
+
+                Board newBoard = board.CloneWithMove(move[0], move[1]);
+
+                int boardValue = EvaluateBoard(newBoard, false);
                 //Debug.Log($"Lance ?: + " + clonedBoard.testBoard[0,0].getState());
                 //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 //board.board[move[0].getRow(), move[0].getCol()].setState(move[1].getState(), move[1].isEnemy(), move[1].isPlayer(), move[1].isPromoted());
@@ -300,12 +304,12 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer)
+    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer, int alpha, int beta)
     {
-
+        //Debug.Log($"Minimax called with depth: {depth}, isMaximizingPlayer: {isMaximizingPlayer}");
         if (depth == 0)
         {
-            return EvaluateBoard(board, isMaximizingPlayer);
+            //return EvaluateBoard(board, isMaximizingPlayer);
         }
 
         int bestValue;
@@ -319,10 +323,17 @@ public class GameController : MonoBehaviour
                 TestBoard newBoard = new();
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
                 clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Max(bestValue, boardValue);
-                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                //Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
+                alpha = Math.Max(alpha, bestValue);
+
+                // Prune the remaining branches if possible
+                if (beta <= alpha)
+                {
+                    break;
+                }
 
             }
         }
@@ -336,15 +347,23 @@ public class GameController : MonoBehaviour
                 TestBoard newBoard = new();
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
                 clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Min(bestValue, boardValue);
-                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                //Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+
+                beta = Math.Min(beta, bestValue);
+
+                // Prune the remaining branches if possible
+                if (beta <= alpha)
+                {
+                    break;
+                }
             }
         }
-
+        Debug.Log($"Bext value: {bestValue}, Depth: {depth}");
         return bestValue;
     }
-    public int EvaluateBoard(TestBoard board, bool isMaximizingPlayer)
+    public int EvaluateBoard(Board board, bool isMaximizingPlayer)
     {
         int score = 0;
 
@@ -353,7 +372,7 @@ public class GameController : MonoBehaviour
         {
             for (int col = 0; col < 9; col++)
             {
-                TestTile tile = board.testBoard[row, col];
+                Tile tile = board.board[row, col];
                 PieceType pieceType = tile.getState();
                 //Debug.Log(tile.getState());
                 //PieceType pieceType = PieceType.Knight;
@@ -400,8 +419,8 @@ public class GameController : MonoBehaviour
                 {
                     int positionalScore = positionalScores[pieceType][row, col];
                     //Debug.Log((tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore);
-                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
-                    //score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue  : pieceValue;
+                    //score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
+                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue  : pieceValue;
                 }
             }
         }
