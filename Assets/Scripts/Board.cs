@@ -148,8 +148,8 @@ public class Board : MonoBehaviour
         bool movingPieceIsEnemy = clonedBoard.board[startRow, startCol].isEnemy();
         bool movingPieceisPlayer = clonedBoard.board[startRow, startCol].isPlayer();
         bool movingPieceisPromoted = clonedBoard.board[startRow, startCol].isPromoted();
-        clonedBoard.board[startRow, startCol].setState(PieceType.None, false, false, false);
-        clonedBoard.board[endRow, endCol].setState(movingPieceType, movingPieceIsEnemy, movingPieceisPlayer, movingPieceisPromoted);
+        clonedBoard.board[startRow, startCol].setState2(PieceType.None, false, false, false);
+        clonedBoard.board[endRow, endCol].setState2(movingPieceType, movingPieceIsEnemy, movingPieceisPlayer, movingPieceisPromoted);
 
         clonedBoard.initializeBoard();
 

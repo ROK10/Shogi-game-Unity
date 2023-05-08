@@ -19,12 +19,16 @@ public class Piece : MonoBehaviour
     private bool promoted;
     private bool enemy;
     private bool player;
+    private bool test;
 
     void Awake()
     {
-        characterFace = Instantiate(
+        if (!test)
+        {
+            characterFace = Instantiate(
             GameController.facePrefab, this.transform)
             .GetComponent<TextMesh>();
+        }
     }
 
     public void raised()
@@ -57,7 +61,12 @@ public class Piece : MonoBehaviour
         return promoted;
     }
 
-    public void setPiece(PieceType piece, bool enemy, bool player, bool promoted)
+    public bool isTest()
+    {
+        return test;
+    }
+
+    public void setPiece(PieceType piece, bool enemy, bool player, bool promoted, bool test)
     {
         this.piece = piece;
         this.enemy = enemy;
@@ -65,6 +74,7 @@ public class Piece : MonoBehaviour
         if (enemy)
             characterFace.transform.Rotate(0, 180, 0, Space.World);
         this.promoted = promoted;
+        this.test = test;
         renderFace(piece);
     }
 

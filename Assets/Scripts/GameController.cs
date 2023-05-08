@@ -283,7 +283,7 @@ public class GameController : MonoBehaviour
 
                 Board newBoard = board.CloneWithMove(move[0], move[1]);
 
-                int boardValue = EvaluateBoard(newBoard, false);
+                int boardValue = Minimax(newBoard, 0, false, int.MinValue, int.MaxValue);
                 //Debug.Log($"Lance ?: + " + clonedBoard.testBoard[0,0].getState());
                 //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 //board.board[move[0].getRow(), move[0].getCol()].setState(move[1].getState(), move[1].isEnemy(), move[1].isPlayer(), move[1].isPromoted());
@@ -304,12 +304,12 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer, int alpha, int beta)
+    public int Minimax(Board board, int depth, bool isMaximizingPlayer, int alpha, int beta)
     {
         //Debug.Log($"Minimax called with depth: {depth}, isMaximizingPlayer: {isMaximizingPlayer}");
         if (depth == 0)
         {
-            //return EvaluateBoard(board, isMaximizingPlayer);
+            return EvaluateBoard(board, isMaximizingPlayer);
         }
 
         int bestValue;
@@ -317,13 +317,11 @@ public class GameController : MonoBehaviour
         if (isMaximizingPlayer)
         {
             bestValue = -10000;
-            List<TestTile[]> possibleMoves = board.GetAllPossibleMoves(true);
-            foreach (TestTile[] move in possibleMoves)
+            List<Tile[]> possibleMoves = board.GetAllPossibleMoves(true);
+            foreach (Tile[] move in possibleMoves)
             {
-                TestBoard newBoard = new();
-                TestBoard clonedBoard = newBoard.createNewBoard(board);
-                clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Board newBoard = board.CloneWithMove(move[0], move[1]);
+                int boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Max(bestValue, boardValue);
                 //Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
@@ -340,14 +338,12 @@ public class GameController : MonoBehaviour
         else
         {
             bestValue = 10000;
-            List<TestTile[]> possibleMoves = board.GetAllPossibleMoves(false);
-            foreach (TestTile[] move in possibleMoves)
+            List<Tile[]> possibleMoves = board.GetAllPossibleMoves(false);
+            foreach (Tile[] move in possibleMoves)
             {
 
-                TestBoard newBoard = new();
-                TestBoard clonedBoard = newBoard.createNewBoard(board);
-                clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
+                Board newBoard = board.CloneWithMove(move[0], move[1]);
+                int boardValue = Minimax(newBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Min(bestValue, boardValue);
                 //Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 

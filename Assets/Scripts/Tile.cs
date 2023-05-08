@@ -117,6 +117,21 @@ public class Tile : MonoBehaviour
             }
         }
     }
+    public void setState2(PieceType state, bool enemy, bool player, bool promoted)
+    {
+        if (state == PieceType.None) removePiece();
+        else
+        {
+            if (this.piece == null) addPiece2(state, enemy, player, promoted);
+            else
+            {
+                Logger.Log(this.piece.isEnemy(), state, this.piece.getPiece());
+                removePiece();
+                addPiece(state, enemy, player, promoted);
+                StartCoroutine(logWait());
+            }
+        }
+    }
 
     public IEnumerator moveState(Tile targetTile)
     {
@@ -142,9 +157,24 @@ public class Tile : MonoBehaviour
         if (enemy)
             this.piece.gameObject.transform.GetChild(0)
             .Rotate(0, 180, 0, Space.World);
-        this.piece.setPiece(state, enemy, player, promoted);
+        this.piece.setPiece(state, enemy, player, promoted, false);
     }
-
+    private void addPiece2(PieceType state, bool enemy, bool player, bool promoted)
+    {
+        this.piece = Instantiate(
+            GameController.piecePrefab,
+            transform.position, Quaternion.identity)
+            .GetComponent<Piece>();
+        MeshRenderer meshRenderer = this.piece.GetComponentInChildren<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.enabled = false;
+        }
+        if (enemy)
+            this.piece.gameObject.transform.GetChild(0)
+            .Rotate(0, 180, 0, Space.World);
+        this.piece.setPiece(state, enemy, player, promoted, true);
+    }
     private void removePiece()
     {
         if (this.piece)
