@@ -553,6 +553,7 @@ public class TestPiece
     private List<int[]> clearSpecificCollision(List<int[]> possibleMoves, TestTile[,] board)
     {
         if (enemy == false)
+        {
             for (int i = possibleMoves.Count - 1; i >= 0; i--)
             {
                 int[] possibleMove = possibleMoves[i];
@@ -565,6 +566,22 @@ public class TestPiece
                         possibleMoves.Remove(possibleMove);
                 }
             }
+        }
+        else
+        {
+            for (int i = possibleMoves.Count - 1; i >= 0; i--)
+            {
+                int[] possibleMove = possibleMoves[i];
+                int x = possibleMove[0], y = possibleMove[1];
+                if (x >= 0 && x < TestBoard.boardSize && y >= 0 && y < TestBoard.boardSize)
+                {
+                    TestTile checkedTile = board[x, y];
+                    if (checkedTile.getState() != PieceType.None &&
+                        checkedTile.isPlayer() == false)
+                        possibleMoves.Remove(possibleMove);
+                }
+            }
+        }
         return possibleMoves;
     }
 
@@ -583,14 +600,31 @@ public class TestPiece
 
     private void lanceMoves(List<int[]> possibleMoves, int row, int col, TestTile[,] board)
     {
-        for (int i = row + 1; i < TestBoard.boardSize; i++)
+        if (!enemy)
         {
-            if (board[i, col].getState() == PieceType.None)
+            for (int i = row + 1; i < Board.boardSize; i++)
             {
-                possibleMoves.Add(new int[2] { i, col });
-                if (board[i, col].isPlayer()) break;
+                if (board[i, col].getState() == PieceType.None ||
+                    board[i, col].isEnemy())
+                {
+                    possibleMoves.Add(new int[2] { i, col });
+                    if (board[i, col].isEnemy()) break;
+                }
+                else break;
             }
-            else break;
+        }
+        else
+        {
+            for (int i = row + 1; i < Board.boardSize; i++)
+            {
+                if (board[i, col].getState() == PieceType.None ||
+                    board[i, col].isPlayer())
+                {
+                    possibleMoves.Add(new int[2] { i, col });
+                    if (board[i, col].isPlayer()) break;
+                }
+                else break;
+            }
         }
     }
 

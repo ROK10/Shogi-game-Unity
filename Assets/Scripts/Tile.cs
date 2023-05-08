@@ -187,7 +187,7 @@ public class TestTile
     private int row;
     private int col;
     public TestPiece piece;
-    public TestTile(int row = 0, int col = 0)
+    public void Initialize(int row, int col)
     {
         this.row = row;
         this.col = col;

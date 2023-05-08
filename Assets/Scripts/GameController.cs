@@ -278,17 +278,18 @@ public class GameController : MonoBehaviour
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
                 //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
                 clonedBoard.CloneMove(move[0],move[1]);
-                int boardValue = Minimax(clonedBoard, 2, false);
+                int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
                 //int boardValue = EvaluateBoard(clonedBoard, false);
                 //Debug.Log($"Lance ?: + " + clonedBoard.testBoard[0,0].getState());
                 //Debug.Log($"Enemy considering move: ({move[0].getRow()}, {move[0].getCol()}) -> ({move[1].getRow()}, {move[1].getCol()}), Value: {boardValue}"); // Add this line
                 //board.board[move[0].getRow(), move[0].getCol()].setState(move[1].getState(), move[1].isEnemy(), move[1].isPlayer(), move[1].isPromoted());
                 //board.board[move[1].getRow(), move[1].getCol()].setState(PieceType.None, false, false, false);
-                if (boardValue > bestMoveValue)
+                if (boardValue >= bestMoveValue)
                 {
                     bestMoveValue = boardValue;
                     bestMove = move;
                 }
+                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestMoveValue}");
                 //Destroy(newBoard.gameObject);
             }
             
@@ -300,7 +301,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer)
+    public int Minimax(TestBoard board, int depth, bool isMaximizingPlayer, int alpha, int beta)
     {
 
         if (depth == 0)
@@ -319,11 +320,16 @@ public class GameController : MonoBehaviour
                 TestBoard newBoard = new();
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
                 clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Max(bestValue, boardValue);
-                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                //Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestValue}");
 
+                alpha = Math.Max(alpha, bestValue);
 
+                if (beta <= alpha)
+                {
+                    break; // Бета відсікання
+                }
             }
         }
         else
@@ -336,9 +342,16 @@ public class GameController : MonoBehaviour
                 TestBoard newBoard = new();
                 TestBoard clonedBoard = newBoard.createNewBoard(board);
                 clonedBoard.CloneMove(move[0], move[1]);
-                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer);
+                int boardValue = Minimax(clonedBoard, depth - 1, !isMaximizingPlayer, alpha, beta);
                 bestValue = Math.Min(bestValue, boardValue);
-                Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+                //Debug.Log($"Minimizing player, boardValue: {boardValue}, bestValue: {bestValue}");
+
+                beta = Math.Min(beta, bestValue);
+
+                if (beta <= alpha)
+                {
+                    break; // Альфа відсікання
+                }
             }
         }
 
@@ -401,7 +414,7 @@ public class GameController : MonoBehaviour
                     int positionalScore = positionalScores[pieceType][row, col];
                     //Debug.Log((tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore);
                     score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
-                    //score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue  : pieceValue;
+                    //score += (tile.isEnemy()) ? pieceValue  : -pieceValue;
                 }
             }
         }

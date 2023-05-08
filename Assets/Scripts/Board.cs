@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class Board : MonoBehaviour
 {
@@ -72,26 +73,62 @@ public class Board : MonoBehaviour
     
     public List<Tile[]> GetAllPossibleMoves(bool isEnemy)
     {
+        int counter = 0;
+        int counter2 = 0;
         List<Tile[]> possibleMoves = new List<Tile[]>();
 
-        foreach (Tile tile in board)
+        if (isEnemy)
         {
-            if (tile.getState() != PieceType.None && tile.isEnemy() == isEnemy)
+            foreach (Tile tile in board)
             {
-                foreach (int[] move in tile.getMoves(board))
+                if (tile.getState() != PieceType.None && tile.isEnemy() == isEnemy)
                 {
-                    int x = move[0], y = move[1];
-                    if (x >= 0 && x < Board.boardSize && y >= 0 && y < Board.boardSize)
+                    counter2++;
+                    foreach (int[] move in tile.getMoves(board))
                     {
-                        Tile targetTile = board[x, y];
-                        if (targetTile.getState() == PieceType.None || targetTile.isEnemy() != isEnemy)
+                        int x = move[0], y = move[1];
+                        if (x >= 0 && x < Board.boardSize && y >= 0 && y < Board.boardSize)
                         {
-                            possibleMoves.Add(new Tile[] { tile, targetTile });
+                            Tile targetTile = board[x, y];
+                            if (targetTile.getState() == PieceType.None || targetTile.isEnemy() != isEnemy)
+                            {
+                                counter++;
+                                //Debug.Log($"Move: {tile.getState()}, Start position {tile.getRow()}, {tile.getCol()}; Enemy?: {isEnemy}");
+                                //Debug.Log($"Move: {targetTile.getState()}, End position {targetTile.getRow()}, {targetTile.getCol()}; Enemy?: {isEnemy}");
+                                possibleMoves.Add(new Tile[] { tile, targetTile });
+                            }
                         }
                     }
                 }
             }
         }
+        if (!isEnemy)
+        {
+            foreach (Tile tile in board)
+            {
+                if (tile.getState() != PieceType.None && tile.isPlayer())
+                {
+                    counter2++;
+                    foreach (int[] move in tile.getMoves(board))
+                    {
+                        int x = move[0], y = move[1];
+                        if (x >= 0 && x < Board.boardSize && y >= 0 && y < Board.boardSize)
+                        {
+                            Tile targetTile = board[x, y];
+                            if (targetTile.getState() == PieceType.None || targetTile.isPlayer() == false)
+                            {
+                                counter++;
+                                //Debug.Log($"Move: {tile.getState()}, Enemy?: {isEnemy}");
+                                //Debug.Log($"Move: {targetTile.getState()}, Enemy?: {isEnemy}");
+                                possibleMoves.Add(new Tile[] { tile, targetTile });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //Debug.Log($"possibleMoves: {counter}, Enemy?: {isEnemy}");
+        //Debug.Log($"possibleMoves2: {counter2}, Enemy?: {isEnemy}");
         return possibleMoves;
     }
     public Board(Board existingBoard)
@@ -171,6 +208,7 @@ public class TestBoard
                 //prepareBoard();
                 Tile existingTile = existingBoard.board[row, col];
                 newTestBoard.testBoard[row, col] = new TestTile();
+                newTestBoard.testBoard[row, col].Initialize(row, col);
                 newTestBoard.testBoard[row, col].setState(existingTile.getState(), existingTile.isEnemy(), existingTile.isPlayer(), existingTile.isPromoted());
             }
         }
@@ -189,6 +227,7 @@ public class TestBoard
                 TestTile existingTile = new();
                 existingTile.setState(existingBoard.testBoard[row, col].getState(), existingBoard.testBoard[row, col].isEnemy(), existingBoard.testBoard[row, col].isPlayer(), existingBoard.testBoard[row, col].isPromoted());
                 newTestBoard.testBoard[row, col] = new TestTile();
+                newTestBoard.testBoard[row, col].Initialize(row, col);
                 newTestBoard.testBoard[row, col].setState(existingTile.getState(), existingTile.isEnemy(), existingTile.isPlayer(), existingTile.isPromoted());
             }
         }
@@ -233,26 +272,58 @@ public class TestBoard
 
     public List<TestTile[]> GetAllPossibleMoves(bool isEnemy)
     {
+        int counter = 0;
+        int counter2 = 0;
         List<TestTile[]> possibleMoves = new List<TestTile[]>();
-
-        foreach (TestTile tile in testBoard)
+        if (isEnemy)
         {
-            if (tile.getState() != PieceType.None && tile.isEnemy() == isEnemy)
+            foreach (TestTile tile in testBoard)
             {
-                foreach (int[] move in tile.getMoves(testBoard))
+                if (tile.getState() != PieceType.None && tile.isEnemy() == isEnemy)
                 {
-                    int x = move[0], y = move[1];
-                    if (x >= 0 && x < TestBoard.boardSize && y >= 0 && y < TestBoard.boardSize)
+                    foreach (int[] move in tile.getMoves(testBoard))
                     {
-                        TestTile targetTile = testBoard[x, y];
-                        if (targetTile.getState() == PieceType.None || targetTile.isEnemy() != isEnemy)
+                        int x = move[0], y = move[1];
+                        if (x >= 0 && x < TestBoard.boardSize && y >= 0 && y < TestBoard.boardSize)
                         {
-                            possibleMoves.Add(new TestTile[] { tile, targetTile });
+                            TestTile targetTile = testBoard[x, y];
+                            if (targetTile.getState() == PieceType.None || targetTile.isEnemy() != isEnemy)
+                            {
+                                counter++;
+                                possibleMoves.Add(new TestTile[] { tile, targetTile });
+                            }
                         }
                     }
                 }
             }
         }
+        if (!isEnemy)
+        {
+            foreach (TestTile tile in testBoard)
+            {
+                if (tile.getState() != PieceType.None && tile.isPlayer())
+                {
+                    counter2++;
+                    foreach (int[] move in tile.getMoves(testBoard))
+                    {
+                        int x = move[0], y = move[1];
+                        if (x >= 0 && x < TestBoard.boardSize && y >= 0 && y < TestBoard.boardSize)
+                        {
+                            TestTile targetTile = testBoard[x, y];
+                            if (targetTile.getState() == PieceType.None || targetTile.isPlayer() == false)
+                            {
+                                counter++;
+                                //Debug.Log($"Move: {tile.getState()}, Start position {tile.getRow()}, {tile.getCol()}; Enemy?: {isEnemy}");
+                                //Debug.Log($"Move: {targetTile.getState()}, End position {targetTile.getRow()}, {targetTile.getCol()}; Enemy?: {isEnemy}");
+                                possibleMoves.Add(new TestTile[] { tile, targetTile });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //Debug.Log($"possibleMoves: {counter}, Enemy?: {isEnemy}");
+        //Debug.Log($"possibleMoves2: {counter2}, Enemy?: {isEnemy}");
         return possibleMoves;
     }
 
