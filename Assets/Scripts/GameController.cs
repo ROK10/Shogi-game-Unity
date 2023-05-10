@@ -27,11 +27,17 @@ public class GameController : MonoBehaviour
     List<int[]> validEnemyMoves = new();
     List<int[]> validEnemyKingMoves = new();
 
+    GameMode gameMode;
+
     private static GameObject boardPrefab;
     public static GameObject facePrefab;
     public static GameObject piecePrefab;
     private Board board;
-
+    public enum GameMode
+    {
+        Mode1,
+        Mode2
+    }
     void Awake()
     {
         boardPrefab = (GameObject)Resources.Load("Board");
@@ -41,6 +47,8 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        MainMenu mainMenu = FindObjectOfType<MainMenu>();
+        gameMode = MainMenu.selectedGameMode;
         board = Instantiate(boardPrefab, new Vector3(0, 0, 0), Quaternion.Euler(0, 0, 0))
                 .GetComponent<Board>();
         turnCounter = 0;
@@ -101,149 +109,155 @@ public class GameController : MonoBehaviour
 
     private IEnumerator PlayerControls()
     {
-        //float startTime = Time.time;
-        ////playerStatus();
-        //yield return new WaitForSeconds(0.2f);
-
-        //while (playersTurn == true)
-        //{
-        //    yield return new WaitForSeconds(
-        //        Time.time - startTime < EnemyMinThinkTime ?
-        //        0.2f : 0.0f
-        //    );
-        //    // Initialize lists for the different targets.
-        //    List<Tile[]> playerTargets = new();
-        //    List<Tile[]> spaceTargets = new();
-        //    List<Tile[]> pawnSpaceTargets = new();
-
-        //    int numberOfPieces = 0;
-        //    bool kingInDanger = false;
-        //    Tile kingPiece = null;
-        //    // For all the possible targets of all enemy pieces present:
-        //    foreach (Tile currentTile in board.board)
-        //    {
-        //        if (currentTile.getState() != PieceType.None && currentTile.isPlayer())
-        //        {
-        //            numberOfPieces++;
-        //            foreach (int[] possibleMove in currentTile.getMoves(board.board))
-        //            {
-        //                // Skip invalid moves / moves that lead to another enemy piece.
-        //                int x = possibleMove[0], y = possibleMove[1];
-        //                if (x < 0 || x >= Board.boardSize || y < 0 || y >= Board.boardSize
-        //                    || board.board[x, y].isPlayer()) continue;
-
-        //                // Add these moves to a list for checkmate checking later.
-        //                this.validEnemyMoves.Add(possibleMove);
-        //                if (currentTile.getState() == PieceType.King)
-        //                    this.validEnemyKingMoves.Add(possibleMove);
-
-        //                Tile targetTile = board.board[x, y];
-        //                // If the target is the player's piece:
-        //                if (targetTile.getState() != PieceType.None &&
-        //                    targetTile.isPlayer() == false)
-        //                {
-        //                    // If the target is a king, then attack and stop checking.
-        //                    if (targetTile.getState() == PieceType.King)
-        //                    {
-        //                        yield return StartCoroutine(pieceMovement(currentTile, targetTile));
-        //                        endGame(DeathType.KingKilled, false);
-        //                        break;
-        //                    }
-        //                    // add to a list of playerTargets.
-        //                    else playerTargets.Add(new Tile[2] { currentTile, targetTile });
-        //                }
-        //                // If the target is empty, add to a list of spaceTargets.
-        //                else if (targetTile.getState() == PieceType.None)
-        //                {
-        //                    spaceTargets.Add(new Tile[2] { currentTile, targetTile });
-        //                    if (currentTile.getState() == PieceType.Pawn)
-        //                        pawnSpaceTargets.Add(new Tile[2] { currentTile, targetTile });
-        //                }
-        //            }
-
-        //            // If the piece is a king, and it is in range of enemy's attack, then move.
-        //            if (currentTile.getState() == PieceType.King)
-        //            {
-        //                kingPiece = currentTile;
-        //                foreach (int[] possiblePlayerMove in this.validMoves)
-        //                {
-        //                    if (currentTile.getRow() == possiblePlayerMove[0] &&
-        //                        currentTile.getCol() == possiblePlayerMove[1])
-        //                        kingInDanger = true;
-        //                }
-        //            }
-        //        }
-        //        if (game == false) break;
-        //    }
-        //    // If it turns out the enemy has no pieces, declare the loss.
-        //    if (numberOfPieces == 0) endGame(DeathType.NoPieces, true);
-
-        //    Tile[] moveTarget = new Tile[2];
-        //    // If the king is within range of the player's attack, move the king.
-        //    if (kingInDanger)
-        //        moveTarget = (
-        //            playerTargets.Count > 0 ?
-        //            playerTargets[
-        //                playerTargets.FindIndex(
-        //                x => x[0].getState() == PieceType.King
-        //            )] :
-        //            spaceTargets[
-        //                spaceTargets.FindIndex(
-        //                x => x[0].getState() == PieceType.King
-        //            ) + 1]
-        //        );
-
-        //    // If there is/are enemy piece(s) in range of attack, high chance to attack:
-        //    else if (playerTargets.Count > 0 && Random.value < enemyOffensiveLevel)
-        //        moveTarget = playerTargets[Random.Range(0, playerTargets.Count - 1)];
-
-        //    // If there is/are empty space(s) in range of movement, move:
-        //    else if (spaceTargets.Count > 0)
-        //        moveTarget = (
-        //            turnCounter < enemyOffensiveLevel * 20 &&
-        //            Random.value < enemyOffensiveLevel ?
-        //            pawnSpaceTargets[Random.Range(0, pawnSpaceTargets.Count - 1)] :
-        //            spaceTargets[Random.Range(0, spaceTargets.Count - 1)]
-        //        );
-
-        //    // Else declare that there are no available moves and lose.
-        //    else endGame(DeathType.NoMoves, true);
-
-        //    // Check if the enemy has been checkmated.
-        //    checkmateStatus(kingPiece, this.validEnemyKingMoves, this.validMoves, true);
-
-        //    // Finally execute the enemy's move.
-        //    Tile enemySelectedTile = moveTarget[0];
-        //    Tile enemyTargetedTile = moveTarget[1];
-        //    yield return StartCoroutine(pieceMovement(enemySelectedTile, enemyTargetedTile));
-        //}
-        playerStatus();
-        while (playersTurn)
+        if (gameMode == GameMode.Mode2)
         {
-            if (Input.GetMouseButtonDown(0))
+            float startTime = Time.time;
+            //playerStatus();
+            yield return new WaitForSeconds(0.2f);
+
+            while (playersTurn == true)
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+                yield return new WaitForSeconds(
+                    Time.time - startTime < EnemyMinThinkTime ?
+                    0.2f : 0.0f
+                );
+                // Initialize lists for the different targets.
+                List<Tile[]> playerTargets = new();
+                List<Tile[]> spaceTargets = new();
+                List<Tile[]> pawnSpaceTargets = new();
+
+                int numberOfPieces = 0;
+                bool kingInDanger = false;
+                Tile kingPiece = null;
+                // For all the possible targets of all enemy pieces present:
+                foreach (Tile currentTile in board.board)
                 {
-                    Transform clicked = hit.transform;
-                    Tile clickedTile = clicked.GetComponent<Tile>();
-                    if (clicked.CompareTag("Tile"))
-                        if (clickedTile.getState() != PieceType.None)
-                            if (clickedTile.isEnemy() == false)
+                    if (currentTile.getState() != PieceType.None && currentTile.isPlayer())
+                    {
+                        numberOfPieces++;
+                        foreach (int[] possibleMove in currentTile.getMoves(board.board))
+                        {
+                            // Skip invalid moves / moves that lead to another enemy piece.
+                            int x = possibleMove[0], y = possibleMove[1];
+                            if (x < 0 || x >= Board.boardSize || y < 0 || y >= Board.boardSize
+                                || board.board[x, y].isPlayer()) continue;
+
+                            // Add these moves to a list for checkmate checking later.
+                            this.validEnemyMoves.Add(possibleMove);
+                            if (currentTile.getState() == PieceType.King)
+                                this.validEnemyKingMoves.Add(possibleMove);
+
+                            Tile targetTile = board.board[x, y];
+                            // If the target is the player's piece:
+                            if (targetTile.getState() != PieceType.None &&
+                                targetTile.isPlayer() == false)
                             {
-                                if (board.selectedTile)
-                                    deselectPiece();
-                                board.selectedTile = clickedTile;
-                                selectPiece();
+                                // If the target is a king, then attack and stop checking.
+                                if (targetTile.getState() == PieceType.King)
+                                {
+                                    yield return StartCoroutine(pieceMovement(currentTile, targetTile));
+                                    endGame(DeathType.KingKilled, false);
+                                    break;
+                                }
+                                // add to a list of playerTargets.
+                                else playerTargets.Add(new Tile[2] { currentTile, targetTile });
                             }
+                            // If the target is empty, add to a list of spaceTargets.
+                            else if (targetTile.getState() == PieceType.None)
+                            {
+                                spaceTargets.Add(new Tile[2] { currentTile, targetTile });
+                                if (currentTile.getState() == PieceType.Pawn)
+                                    pawnSpaceTargets.Add(new Tile[2] { currentTile, targetTile });
+                            }
+                        }
+
+                        // If the piece is a king, and it is in range of enemy's attack, then move.
+                        if (currentTile.getState() == PieceType.King)
+                        {
+                            kingPiece = currentTile;
+                            foreach (int[] possiblePlayerMove in this.validMoves)
+                            {
+                                if (currentTile.getRow() == possiblePlayerMove[0] &&
+                                    currentTile.getCol() == possiblePlayerMove[1])
+                                    kingInDanger = true;
+                            }
+                        }
+                    }
+                    if (game == false) break;
+                }
+                // If it turns out the enemy has no pieces, declare the loss.
+                if (numberOfPieces == 0) endGame(DeathType.NoPieces, true);
+
+                Tile[] moveTarget = new Tile[2];
+                // If the king is within range of the player's attack, move the king.
+                if (kingInDanger)
+                    moveTarget = (
+                        playerTargets.Count > 0 ?
+                        playerTargets[
+                            playerTargets.FindIndex(
+                            x => x[0].getState() == PieceType.King
+                        )] :
+                        spaceTargets[
+                            spaceTargets.FindIndex(
+                            x => x[0].getState() == PieceType.King
+                        ) + 1]
+                    );
+
+                // If there is/are enemy piece(s) in range of attack, high chance to attack:
+                else if (playerTargets.Count > 0 && Random.value < enemyOffensiveLevel)
+                    moveTarget = playerTargets[Random.Range(0, playerTargets.Count - 1)];
+
+                // If there is/are empty space(s) in range of movement, move:
+                else if (spaceTargets.Count > 0)
+                    moveTarget = (
+                        turnCounter < enemyOffensiveLevel * 20 &&
+                        Random.value < enemyOffensiveLevel ?
+                        pawnSpaceTargets[Random.Range(0, pawnSpaceTargets.Count - 1)] :
+                        spaceTargets[Random.Range(0, spaceTargets.Count - 1)]
+                    );
+
+                // Else declare that there are no available moves and lose.
+                else endGame(DeathType.NoMoves, true);
+
+                // Check if the enemy has been checkmated.
+                checkmateStatus(kingPiece, this.validEnemyKingMoves, this.validMoves, true);
+
+                // Finally execute the enemy's move.
+                Tile enemySelectedTile = moveTarget[0];
+                Tile enemyTargetedTile = moveTarget[1];
+                yield return StartCoroutine(pieceMovement(enemySelectedTile, enemyTargetedTile));
+            }
+        }
+        else 
+        {
+            playerStatus();
+            while (playersTurn)
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        Transform clicked = hit.transform;
+                        Tile clickedTile = clicked.GetComponent<Tile>();
+                        if (clicked.CompareTag("Tile"))
+                            if (clickedTile.getState() != PieceType.None)
+                                if (clickedTile.isEnemy() == false)
+                                {
+                                    if (board.selectedTile)
+                                        deselectPiece();
+                                    board.selectedTile = clickedTile;
+                                    selectPiece();
+                                }
+                                else movePiece(clickedTile);
                             else movePiece(clickedTile);
-                        else movePiece(clickedTile);
+                        else deselectPiece();
+                    }
                     else deselectPiece();
                 }
-                else deselectPiece();
+                yield return null;
             }
-            yield return null;
         }
     }
 
