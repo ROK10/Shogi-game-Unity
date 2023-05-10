@@ -69,6 +69,8 @@ public class Board : MonoBehaviour
         board[8, 5].setState(PieceType.Gold, true, false, false);
         board[8, 3].setState(PieceType.Gold, true, false, false);
         board[8, 4].setState(PieceType.King, true, false, false);
+
+        //board[5, 5].setState(PieceType.Lance, true, false, false);
     }
     
     public List<Tile[]> GetAllPossibleMoves(bool isEnemy)

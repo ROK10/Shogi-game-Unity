@@ -283,27 +283,29 @@ public class GameController : MonoBehaviour
 
             Tile[] bestMove = null;
 
-            int bestMoveValue = -10000;
-            foreach (Tile[] move in allPossibleEnemyMoves)
-            {
-                
-                TestBoard newBoard = new();
-                TestBoard clonedBoard = newBoard.createNewBoard(board);
-
-                //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
-
-                clonedBoard.CloneMove(move[0],move[1]);
-                int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
-
-                if (boardValue >= bestMoveValue)
+            int bestMoveValue = int.MinValue;
+            int maxDepth = 3;
+            //for (int currentDepth = 1; currentDepth <= maxDepth; currentDepth++)
+            //{
+                foreach (Tile[] move in allPossibleEnemyMoves)
                 {
-                    bestMoveValue = boardValue;
-                    bestMove = move;
+
+                    TestBoard newBoard = new();
+                    TestBoard clonedBoard = newBoard.createNewBoard(board);
+
+                    //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
+
+                    clonedBoard.CloneMove(move[0], move[1]);
+                    //int boardValue = Minimax(clonedBoard, currentDepth, false, int.MinValue, int.MaxValue);
+                    int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
+                    if (boardValue >= bestMoveValue)
+                    {
+                        bestMoveValue = boardValue;
+                        bestMove = move;
+                    }
+                    Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestMoveValue}");
                 }
-                Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestMoveValue}");
-                //Destroy(newBoard.gameObject);
-            }
-            
+            //}
 
             Tile enemySelectedTile = bestMove[0];
             Tile enemyTargetedTile = bestMove[1];
