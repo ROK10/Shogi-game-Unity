@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
@@ -261,17 +263,21 @@ public class GameController : MonoBehaviour
         }
     }
 
+    string time = System.DateTime.Now.ToLongTimeString();
+    int turn = 0;
+    TimeSpan totalTime = TimeSpan.Zero;
+
     public IEnumerator EnemyControls()
     {
         float startTime = Time.time;
         //playerStatus();
-        yield return new WaitForSeconds(0.8f);
+        yield return new WaitForSeconds(0.0f);
 
         while (!playersTurn)
         {
             yield return new WaitForSeconds(
             Time.time - startTime < EnemyMinThinkTime ?
-            0.2f : 0.0f
+            0.0f : 0.0f
         );
 
             List<Tile[]> allPossibleEnemyMoves = board.GetAllPossibleMoves(true);
@@ -280,14 +286,19 @@ public class GameController : MonoBehaviour
                 endGame(DeathType.NoMoves, true);
                 yield break;
             }
+            Stopwatch stopwatch = new Stopwatch();
+
 
             Tile[] bestMove = null;
 
             int bestMoveValue = int.MinValue;
             int maxDepth = 3;
+
+            //Debug.Log($"Start enemy turn time " + System.DateTime.Now.ToLongTimeString() + " " + turn);
             //for (int currentDepth = 1; currentDepth <= maxDepth; currentDepth++)
             //{
-                foreach (Tile[] move in allPossibleEnemyMoves)
+            stopwatch.Start();
+            foreach (Tile[] move in allPossibleEnemyMoves)
                 {
 
                     TestBoard newBoard = new();
@@ -297,18 +308,33 @@ public class GameController : MonoBehaviour
 
                     clonedBoard.CloneMove(move[0], move[1]);
                     //int boardValue = Minimax(clonedBoard, currentDepth, false, int.MinValue, int.MaxValue);
-                    int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
+                    int boardValue = Minimax(clonedBoard, 3, false, int.MinValue, int.MaxValue);
                     if (boardValue >= bestMoveValue)
                     {
                         bestMoveValue = boardValue;
                         bestMove = move;
                     }
-                    Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestMoveValue}");
+                    //Debug.Log($"Maximizing player, boardValue: {boardValue}, bestValue: {bestMoveValue}");
                 }
             //}
 
             Tile enemySelectedTile = bestMove[0];
             Tile enemyTargetedTile = bestMove[1];
+
+            stopwatch.Stop();
+
+            TimeSpan moveTime = stopwatch.Elapsed;
+
+            totalTime += moveTime;
+            turn++;
+            Debug.Log($"Time spent on move: {moveTime.TotalSeconds} s");
+
+            stopwatch.Reset();
+
+            TimeSpan averageTime = TimeSpan.FromSeconds((double)totalTime.TotalSeconds / turn);
+
+            // Output the average time to the debug log
+            Debug.Log($"Average time spent on moves: {averageTime.TotalSeconds} s");
 
             if (enemyTargetedTile.getState() == PieceType.King)
             {
@@ -316,7 +342,9 @@ public class GameController : MonoBehaviour
                 endGame(DeathType.KingKilled, false);
                 break;
             }
+
             yield return StartCoroutine(pieceMovement(enemySelectedTile, enemyTargetedTile));
+            time = System.DateTime.Now.ToLongTimeString();
         }
     }
 
@@ -398,22 +426,22 @@ public class GameController : MonoBehaviour
                         pieceValue = 10;
                         break;
                     case PieceType.Knight:
-                        pieceValue = 30;
+                        pieceValue = 60;
                         break;
                     case PieceType.Bishop:
-                        pieceValue = 30;
+                        pieceValue = 130;
                         break;
                     case PieceType.Rook:
-                        pieceValue = 50;
+                        pieceValue = 150;
                         break;
                     case PieceType.Lance:
-                        pieceValue = 20;
+                        pieceValue = 50;
                         break;
                     case PieceType.Silver:
-                        pieceValue = 40;
+                        pieceValue = 80;
                         break;
                     case PieceType.Gold:
-                        pieceValue = 50;
+                        pieceValue = 90;
                         break;
                     case PieceType.King:
                         pieceValue = 900;
@@ -431,7 +459,7 @@ public class GameController : MonoBehaviour
                 {
                     int positionalScore = positionalScores[pieceType][row, col];
                     //Debug.Log((tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore);
-                    score += (tile.isEnemy() == isMaximizingPlayer) ? -pieceValue - positionalScore : pieceValue + positionalScore;
+                    score += (!tile.isEnemy()) ? -pieceValue - positionalScore : pieceValue + positionalScore;
                     //score += (tile.isEnemy()) ? pieceValue  : -pieceValue;
                 }
             }
