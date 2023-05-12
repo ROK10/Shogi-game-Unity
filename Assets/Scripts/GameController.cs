@@ -263,7 +263,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    string time = System.DateTime.Now.ToLongTimeString();
     int turn = 0;
     TimeSpan totalTime = TimeSpan.Zero;
 
@@ -308,7 +307,7 @@ public class GameController : MonoBehaviour
 
                     clonedBoard.CloneMove(move[0], move[1]);
                     //int boardValue = Minimax(clonedBoard, currentDepth, false, int.MinValue, int.MaxValue);
-                    int boardValue = Minimax(clonedBoard, 3, false, int.MinValue, int.MaxValue);
+                    int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
                     if (boardValue >= bestMoveValue)
                     {
                         bestMoveValue = boardValue;
@@ -344,7 +343,6 @@ public class GameController : MonoBehaviour
             }
 
             yield return StartCoroutine(pieceMovement(enemySelectedTile, enemyTargetedTile));
-            time = System.DateTime.Now.ToLongTimeString();
         }
     }
 

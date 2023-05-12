@@ -402,19 +402,6 @@ public class Piece : MonoBehaviour
         return possibleMoves;
     }
 
-    private List<int[]> sideInverse(List<int[]> possibleMoves, int row)
-    {
-        if (enemy)
-            foreach (int[] possibleMove in possibleMoves)
-                if (possibleMove[0] != row)
-                    possibleMove[0] = (
-                        possibleMove[0] < row ?
-                        row + (row - possibleMove[0]) :
-                        row - (possibleMove[0] - row)
-                    );
-        return possibleMoves;
-    }
-
     private void lanceMoves(List<int[]> possibleMoves, int row, int col, Tile[,] board)
     {
         if (enemy == true)
@@ -891,18 +878,6 @@ public class TestPiece
         return possibleMoves;
     }
 
-    private List<int[]> sideInverse(List<int[]> possibleMoves, int row)
-    {
-        if (enemy)
-            foreach (int[] possibleMove in possibleMoves)
-                if (possibleMove[0] != row)
-                    possibleMove[0] = (
-                        possibleMove[0] < row ?
-                        row + (row - possibleMove[0]) :
-                        row - (possibleMove[0] - row)
-                    );
-        return possibleMoves;
-    }
 
     private void lanceMoves(List<int[]> possibleMoves, int row, int col, TestTile[,] board)
     {
