@@ -38,7 +38,8 @@ public class GameController : MonoBehaviour
     public enum GameMode
     {
         Mode1,
-        Mode2
+        Mode2,
+        Mode3,
     }
     void Awake()
     {
@@ -111,7 +112,7 @@ public class GameController : MonoBehaviour
 
     private IEnumerator PlayerControls()
     {
-        if (gameMode == GameMode.Mode2)
+        if (gameMode == GameMode.Mode3)
         {
             float startTime = Time.time;
             //playerStatus();
@@ -289,10 +290,16 @@ public class GameController : MonoBehaviour
 
 
             Tile[] bestMove = null;
-
+            int maxDepth;
             int bestMoveValue = int.MinValue;
-            int maxDepth = 3;
-
+            if (gameMode == GameMode.Mode2)
+            {
+                maxDepth = 3;
+            }
+            else
+            {
+                maxDepth = 2;
+            }
             //Debug.Log($"Start enemy turn time " + System.DateTime.Now.ToLongTimeString() + " " + turn);
             //for (int currentDepth = 1; currentDepth <= maxDepth; currentDepth++)
             //{
@@ -303,11 +310,11 @@ public class GameController : MonoBehaviour
                     TestBoard newBoard = new();
                     TestBoard clonedBoard = newBoard.createNewBoard(board);
 
-                    //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
-
-                    clonedBoard.CloneMove(move[0], move[1]);
+                //Debug.Log($"Lance ? 2222: + " + clonedBoard.testBoard[0, 0].getState());
+                //Debug.Log($"Depth" + (maxDepth+1));
+                clonedBoard.CloneMove(move[0], move[1]);
                     //int boardValue = Minimax(clonedBoard, currentDepth, false, int.MinValue, int.MaxValue);
-                    int boardValue = Minimax(clonedBoard, 2, false, int.MinValue, int.MaxValue);
+                    int boardValue = Minimax(clonedBoard, maxDepth, false, int.MinValue, int.MaxValue);
                     if (boardValue >= bestMoveValue)
                     {
                         bestMoveValue = boardValue;
@@ -326,14 +333,14 @@ public class GameController : MonoBehaviour
 
             totalTime += moveTime;
             turn++;
-            Debug.Log($"Time spent on move: {moveTime.TotalSeconds} s");
+            //Debug.Log($"Time spent on move: {moveTime.TotalSeconds} s");
 
             stopwatch.Reset();
 
             TimeSpan averageTime = TimeSpan.FromSeconds((double)totalTime.TotalSeconds / turn);
 
             // Output the average time to the debug log
-            Debug.Log($"Average time spent on moves: {averageTime.TotalSeconds} s");
+            //Debug.Log($"Average time spent on moves: {averageTime.TotalSeconds} s");
 
             if (enemyTargetedTile.getState() == PieceType.King)
             {

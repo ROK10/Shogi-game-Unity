@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour
     public GameObject gameOver;
     private Button playButton1;
     private Button playButton2;
+    private Button playButton3;
     private Button quitButton;
 
     void Awake()
@@ -32,9 +33,11 @@ public class MainMenu : MonoBehaviour
     {
         playButton1 = transform.GetChild(1).GetComponent<Button>();
         playButton2 = transform.GetChild(2).GetComponent<Button>();
-        quitButton = transform.GetChild(3).GetComponent<Button>();
+        playButton3 = transform.GetChild(3).GetComponent<Button>();
+        quitButton = transform.GetChild(4).GetComponent<Button>();
         playButton1.onClick.AddListener(() => PlayGame(GameMode.Mode1));
         playButton2.onClick.AddListener(() => PlayGame(GameMode.Mode2));
+        playButton3.onClick.AddListener(() => PlayGame(GameMode.Mode3));
         quitButton.onClick.AddListener(QuitGame);
     }
 
