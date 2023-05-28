@@ -11,6 +11,10 @@ using Random = UnityEngine.Random;
 public class GameController : MonoBehaviour
 {
 
+    //Assets and part of the scripts are taken from the project https://github.com/NicholasSebastian/Shogi-Game.
+    //Most of the code has been rewritten and completed
+    //Artificial intelligence has been implemented using the minimax algorithm
+
     public static bool game = true;
     public static bool multiplayer = false;
     public static bool playersTurn = true;
